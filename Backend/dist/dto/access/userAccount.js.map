@@ -1,0 +1,1 @@
+{"version":3,"file":"userAccount.js","sourceRoot":"","sources":["../../../src/dto/access/userAccount.ts"],"names":[],"mappings":";;;AAAA,MAAa,cAAc;IAIvB,YAAY,GAAG;QACX,IAAI,CAAC,MAAM,GAAC,CAAC,GAAG,KAAI,GAAG,aAAH,GAAG,uBAAH,GAAG,CAAE,MAAM,CAAA,CAAC,CAAC,CAAC,CAAC,GAAG,CAAC,MAAM,CAAA,CAAC,CAAA,EAAE,CAAC;IACrD,CAAC;CAEJ;AARD,wCAQC"}
