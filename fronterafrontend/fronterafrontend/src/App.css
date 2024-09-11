@@ -1,0 +1,132 @@
+.p{
+    color:rgb(253, 252, 252);
+}
+.bg-light{
+    background-color: rgb(17 28 54 / 1) !important;
+}
+.navbar-box{
+    margin: 15px 0 15px 0 !important;
+    padding: 0.5rem !important;
+    background-color: rgb(17 28 54 / 1) !important;
+    color: white !important;
+    border-radius: 0.5rem !important;
+    align-items: center !important;
+}
+a{
+    text-decoration: none !important;
+}
+.nav-item {
+    margin-left: 1rem !important;
+    display: flex;
+    align-items: center; /* Ensures items are centered vertically */
+    height: 100%; /* Use 100% height relative to the parent */
+    justify-content: center;
+}
+
+.nav-item button {
+    background-color: white !important;
+    height: 100%; /* Fills the height of the parent */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.logout-btn{
+    background-color: white !important;
+    color: black !important;
+    /* font-weight: 600 !important; */
+    /* font-size: 1.25rem !important; */
+
+}
+.username{
+    font-weight: 600 !important;
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+    padding: .5rem !important;
+    background-color: white !important;
+    color: rgb(17 28 54 / 1) !important;
+
+}
+.navbar-nav{
+    margin-right: 10px !important;
+    a{
+        color: white !important;
+    }
+}
+ 
+a{
+    color: black !important;
+}
+ 
+.active{
+    background-color: rgb(49 158 79 / 1) !important;
+}
+.d-right{
+    position: absolute;
+    right: 15px;
+}
+/* Hide the menu by default */
+.navbar-collapse {
+    display: none;
+  }
+  
+  /* Show the menu when toggled */
+  .navbar-collapse.show {
+    display: block;
+  }
+  
+  /* Optionally, add styles for animation */
+  .navbar-collapse {
+    transition: max-height 0.3s ease-out;
+    max-height: 0;
+    overflow: hidden;
+  }
+  
+  .navbar-collapse.show {
+    max-height: 500px; /* Adjust as needed */
+  }
+
+  .navbar-toggler{
+    background-color: white !important;
+  }
+  .nav-item:hover {
+    background-color: rgb(49 158 79 / 1) !important;
+    
+}
+  @media only screen and (max-width: 768px) {
+    .navbar-nav{
+        text-align: center !important;
+    }
+    .text-primary{
+        background-color: white !important;
+        padding:0.5rem !important;
+        border-radius: 0.5rem !important;
+        margin-bottom: 15px !important;
+    }
+    .nav-item{
+        text-align: center !important;
+        display: ruby !important;
+        button{
+            margin-top: 15px !important;
+        }
+    }
+    .active{
+        background-color: rgb(49 158 79 / 1) !important;
+
+    }
+    .user:hover{
+        background: none!important;
+    }
+    .auth-btn:hover{
+        background: none!important;
+    }
+    
+  }
+
+  .notification{
+    padding-top: 10px;
+  }
+  .notification:hover{
+    background-color: transparent !important;
+  }
