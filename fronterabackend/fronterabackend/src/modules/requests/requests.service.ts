@@ -68,23 +68,23 @@ export class RequestsService {
                         ? requestInfo.providerID
                         : null;
           if(medCenterID && !proID){
-            let medCenterProv = await transactionalEntityManager.query('select email from users where associatedMedicalID=? AND role="PROVIDER"',[
+            let medCenterProv = await transactionalEntityManager.query('select email, name from users where associatedMedicalID=? AND role="PROVIDER"',[
               medCenterID
             ])
             listOfEmails=[...medCenterProv]
           }
           else if(!medCenterID && !proID){
-            let medCenterProv = await transactionalEntityManager.query('select email from users where role="PROVIDER";',[])
+            let medCenterProv = await transactionalEntityManager.query('select email, name from users where role="PROVIDER";',[])
             listOfEmails=[...medCenterProv]
           }
           else if(!medCenterID && proID){
-            let provEmails = await transactionalEntityManager.query('select email from users where id=? AND role="PROVIDER"',[
+            let provEmails = await transactionalEntityManager.query('select email, name from users where id=? AND role="PROVIDER"',[
               proID
             ])
             listOfEmails=[...provEmails]
           }
           else if(medCenterID && proID){
-            let provEmails = await transactionalEntityManager.query('select email from users where id=? AND role="PROVIDER"',[
+            let provEmails = await transactionalEntityManager.query('select email, name from users where id=? AND role="PROVIDER"',[
               proID
             ])
             listOfEmails=[...provEmails]
@@ -94,6 +94,7 @@ export class RequestsService {
             let data: updateAvailbilityEmail = new updateAvailbilityEmail();
             data.recieverEmail = listOfEmails[i].email;
             data.deadline = requestInfo.deadline;
+            data.providerName = listOfEmails[i].name;  // Include provider name
             data.login_url = process.env.DOMAIN_URL;
             await this.emailService.sendUpdateScheduleEmail(data);
             
@@ -130,231 +131,375 @@ export class RequestsService {
     );
   }
 
-  async addAvailability(availbilityInfo: addAvailabilityDTO, req) {
-    let logAdded:boolean=false;
-    let result = await getManager().transaction(
-      async (transactionalEntityManager) => {
-        let overlappingEntries = {};
-        let requestInfo = await transactionalEntityManager.query(
-          "select * from requests where id=?",
-          [availbilityInfo.requestID]
-        );
+  // async addAvailability(availbilityInfo: addAvailabilityDTO, req) {
+  //   let logAdded:boolean=false;
+  //   let result = await getManager().transaction(
+  //     async (transactionalEntityManager) => {
+  //       let overlappingEntries = {};
+  //       let requestInfo = await transactionalEntityManager.query(
+  //         "select * from requests where id=?",
+  //         [availbilityInfo.requestID]
+  //       );
 
-        let providerShiftsInfo = await transactionalEntityManager.query(
-          "select * from `provider-availability` where providerID=?",
-          [req.user.id]
-        );
+  //       let providerShiftsInfo = await transactionalEntityManager.query(
+  //         "select * from `provider-availability` where providerID=?",
+  //         [req.user.id]
+  //       );
 
-        let providerInfo = await transactionalEntityManager.query(
-          "select * from users where id=?",
-          [req.user.id]
-        );
+  //       let providerInfo = await transactionalEntityManager.query(
+  //         "select * from users where id=?",
+  //         [req.user.id]
+  //       );
 
-        let roomList = await transactionalEntityManager.query(
-          "select * from `medical-center-rooms` mcr where mcr.medicalCenterID = ? AND mcr.roomTypeID=?",
-          [
-            providerInfo[0].associatedMedicalID,
-            providerInfo[0].specializationID,
-          ]
-        );
+  //       let roomList = await transactionalEntityManager.query(
+  //         "select * from `medical-center-rooms` mcr where mcr.medicalCenterID = ? AND mcr.roomTypeID=?",
+  //         [
+  //           providerInfo[0].associatedMedicalID,
+  //           providerInfo[0].specializationID,
+  //         ]
+  //       );
 
-        let extraHolidays = await transactionalEntityManager.query(
-          "SELECT holidayDate FROM requestholidays where requestID=?",
-          [availbilityInfo.requestID]
-        );
+  //       let extraHolidays = await transactionalEntityManager.query(
+  //         "SELECT holidayDate FROM requestholidays where requestID=?",
+  //         [availbilityInfo.requestID]
+  //       );
 
-        if (
-          availbilityInfo.availability &&
-          availbilityInfo.availability.length
-        ) {
-          for (let i = 0; i < availbilityInfo.availability.length; i++) {
-            let info = availbilityInfo.availability[i];
-            let startDate = info.startDate; 
-            let endDate = info.endDate;
-            let holidays = extraHolidays.map((x)=>moment(x.holidayDate).format('YYYY-MM-DD'))
-            let days: string[] = this.getWeekdaysBetween(
-              startDate, 
-              endDate,
-              requestInfo[0].weekendsOff,
-              holidays 
-            );
-            let shiftStart =
-              providerShiftsInfo[
-                providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
-              ].shiftFrom;
-            let shiftEnd =
-              providerShiftsInfo[
-                providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
-              ].shiftTo;
-            if (days && days.length) {
-              for (let j = 0; j < days.length; j++) {
-                let currentDate = days[j];
-                if (roomList && roomList.length) {
-                  for (let k = 0; k < roomList.length; k++) {
-                    let preferredRoomPro = await transactionalEntityManager.query('call sp_req_check_room_if_provider_added_availability(?);',[[
-                      roomList[k].id,
-                      currentDate,
-                      availbilityInfo.requestID,
-                      req.user.id
-                    ]])
+  //       if (
+  //         availbilityInfo.availability &&
+  //         availbilityInfo.availability.length
+  //       ) {
+  //         for (let i = 0; i < availbilityInfo.availability.length; i++) {
+  //           let info = availbilityInfo.availability[i];
+  //           let startDate = info.startDate; 
+  //           let endDate = info.endDate;
+  //           let holidays = extraHolidays.map((x)=>moment(x.holidayDate).format('YYYY-MM-DD'))
+  //           let days: string[] = this.getWeekdaysBetween(
+  //             startDate, 
+  //             endDate,
+  //             requestInfo[0].weekendsOff,
+  //             holidays 
+  //           );
+  //           let shiftStart =
+  //             providerShiftsInfo[
+  //               providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
+  //             ].shiftFrom;
+  //           let shiftEnd =
+  //             providerShiftsInfo[
+  //               providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
+  //             ].shiftTo;
+  //           if (days && days.length) {
+  //             for (let j = 0; j < days.length; j++) {
+  //               let currentDate = days[j];
+  //               if (roomList && roomList.length) {
+  //                 for (let k = 0; k < roomList.length; k++) {
+  //                   let preferredRoomPro = await transactionalEntityManager.query('call sp_req_check_room_if_provider_added_availability(?);',[[
+  //                     roomList[k].id,
+  //                     currentDate,
+  //                     availbilityInfo.requestID,
+  //                     req.user.id
+  //                   ]])
                     
-                    if(preferredRoomPro && preferredRoomPro[0] && preferredRoomPro[0][0] && preferredRoomPro[0][0].count > 0){
-                      let shiftsOnThatDay =
-                      await transactionalEntityManager.query(
-                        "call sp_req_get_shift_on_single_day(?,?,?,?)",
-                        [
-                          providerInfo[0].associatedMedicalID,
-                          currentDate,
-                          providerInfo[0].specializationID,
-                          roomList[k].id,
-                        ]
-                      );
-                      shiftsOnThatDay = shiftsOnThatDay[0];
-                      if (
-                        this.isOverlapping(shiftStart, shiftEnd, shiftsOnThatDay)
-                      ) {
-                        overlappingEntries[ 
-                          currentDate
-                        ] = `overlapping on ${currentDate} for room ${roomList[k].id}`;
-                      } else {
-                        overlappingEntries[currentDate] = null;
-                        await transactionalEntityManager.query(
-                          `
-                                              INSERT INTO appointments
-                                              (providerID, medicalCenterID, providerShiftID, apointmentDate, roomID,requestID)
-                                              VALUES(?,?,?,?,?,?);
-                                              `,
-                          [
-                            req.user.id,
-                            providerInfo[0].associatedMedicalID,
-                            info.shiftID,
-                            currentDate,
-                            roomList[k].id,
-                            availbilityInfo.requestID,
-                          ]
-                        );
-                        if(!logAdded){
-                          await transactionalEntityManager.query(
-                            `INSERT INTO activityLogs(name,activity,userID,requestID, causerID) 
-                            VALUES(?,?,?,?,?)`,[
-                              'Added Availability',
-                              `${req.user.name} have added their availability against request.`,
-                              req.user.id,
-                              availbilityInfo.requestID,
-                              req.user.id
-                            ]
-                          )
-                          logAdded=true;
-                        }
-                        k = roomList.length;
-                      }
-                    }
-                    else{
-                      overlappingEntries[
-                        currentDate
-                      ] = `Blocked on ${currentDate} for room ${roomList[k].id}`;
-                    }
+  //                   if(preferredRoomPro && preferredRoomPro[0] && preferredRoomPro[0][0] && preferredRoomPro[0][0].count > 0){
+  //                     let shiftsOnThatDay =
+  //                     await transactionalEntityManager.query(
+  //                       "call sp_req_get_shift_on_single_day(?,?,?,?)",
+  //                       [
+  //                         providerInfo[0].associatedMedicalID,
+  //                         currentDate,
+  //                         providerInfo[0].specializationID,
+  //                         roomList[k].id,
+  //                       ]
+  //                     );
+  //                     shiftsOnThatDay = shiftsOnThatDay[0];
+  //                     if (
+  //                       this.isOverlapping(shiftStart, shiftEnd, shiftsOnThatDay)
+  //                     ) {
+  //                       overlappingEntries[ 
+  //                         currentDate
+  //                       ] = `overlapping on ${currentDate} for room ${roomList[k].id}`;
+  //                     } else {
+  //                       overlappingEntries[currentDate] = null;
+  //                       await transactionalEntityManager.query(
+  //                         `
+  //                                             INSERT INTO appointments
+  //                                             (providerID, medicalCenterID, providerShiftID, apointmentDate, roomID,requestID)
+  //                                             VALUES(?,?,?,?,?,?);
+  //                                             `,
+  //                         [
+  //                           req.user.id,
+  //                           providerInfo[0].associatedMedicalID,
+  //                           info.shiftID,
+  //                           currentDate,
+  //                           roomList[k].id,
+  //                           availbilityInfo.requestID,
+  //                         ]
+  //                       );
+  //                       if(!logAdded){
+  //                         await transactionalEntityManager.query(
+  //                           `INSERT INTO activityLogs(name,activity,userID,requestID, causerID) 
+  //                           VALUES(?,?,?,?,?)`,[
+  //                             'Added Availability',
+  //                             `${req.user.name} have added their availability against request.`,
+  //                             req.user.id,
+  //                             availbilityInfo.requestID,
+  //                             req.user.id
+  //                           ]
+  //                         )
+  //                         logAdded=true;
+  //                       }
+  //                       k = roomList.length;
+  //                     }
+  //                   }
+  //                   else{
+  //                     overlappingEntries[
+  //                       currentDate
+  //                     ] = `Blocked on ${currentDate} for room ${roomList[k].id}`;
+  //                   }
 
                   
-                  }
-                }
-              }
-            }
-          }
-        }
-        if (
-          availbilityInfo.customAvailability &&
-          availbilityInfo.customAvailability.length
-        ) {
-          for (let i = 0; i < availbilityInfo.customAvailability.length; i++) {
-            let info = availbilityInfo.customAvailability[i];
-            let currentDate = info.date;
-            let shiftStart =
-              providerShiftsInfo[
-                providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
-              ].shiftFrom;
-            let shiftEnd =
-              providerShiftsInfo[
-                providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
-              ].shiftTo;
-            if (roomList && roomList.length) {
-              for (let j = 0; j < roomList.length; j++) {
-                let preferredRoomPro = await transactionalEntityManager.query('call sp_req_check_room_if_provider_added_availability(?);',[[
-                  roomList[j].id,
-                  currentDate,
-                  availbilityInfo.requestID,
-                  req.user.id
-                ]])
-                if(preferredRoomPro && preferredRoomPro[0] && preferredRoomPro[0][0] && preferredRoomPro[0][0].count > 0){
-                  let shiftsOnThatDay = await transactionalEntityManager.query(
-                    "call sp_req_get_shift_single_date_exluding(?,?,?,?,?)",
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //       if (
+  //         availbilityInfo.customAvailability &&
+  //         availbilityInfo.customAvailability.length
+  //       ) {
+  //         for (let i = 0; i < availbilityInfo.customAvailability.length; i++) {
+  //           let info = availbilityInfo.customAvailability[i];
+  //           let currentDate = info.date;
+  //           let shiftStart =
+  //             providerShiftsInfo[
+  //               providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
+  //             ].shiftFrom;
+  //           let shiftEnd =
+  //             providerShiftsInfo[
+  //               providerShiftsInfo.findIndex((x) => (x.id == info.shiftID))
+  //             ].shiftTo;
+  //           if (roomList && roomList.length) {
+  //             for (let j = 0; j < roomList.length; j++) {
+  //               let preferredRoomPro = await transactionalEntityManager.query('call sp_req_check_room_if_provider_added_availability(?);',[[
+  //                 roomList[j].id,
+  //                 currentDate,
+  //                 availbilityInfo.requestID,
+  //                 req.user.id
+  //               ]])
+  //               if(preferredRoomPro && preferredRoomPro[0] && preferredRoomPro[0][0] && preferredRoomPro[0][0].count > 0){
+  //                 let shiftsOnThatDay = await transactionalEntityManager.query(
+  //                   "call sp_req_get_shift_single_date_exluding(?,?,?,?,?)",
+  //                   [
+  //                     providerInfo.associatedMedicalID,
+  //                     currentDate,
+  //                     providerInfo.specializationID,
+  //                     roomList[j].id,
+  //                     req.user.id,
+  //                   ]
+  //                 );
+  //                 shiftsOnThatDay = shiftsOnThatDay[0];
+  //                 if (this.isOverlapping(shiftStart, shiftEnd, shiftsOnThatDay)) {
+  //                   overlappingEntries[
+  //                     currentDate
+  //                   ] = `overlapping on ${currentDate} for room ${roomList[j].id}`;
+  //                 } else {
+  //                   overlappingEntries[currentDate] = null;
+  //                   await transactionalEntityManager.query(
+  //                     `
+  //                                     DELETE FROM appointments a WHERE a.providerID=? AND a.medicalCenterID=? AND  a.apointmentDate=? AND a.roomID=?;
+  //                                     `,
+  //                     [
+  //                       req.user.id,
+  //                       providerInfo.associatedMedicalID,
+  //                       currentDate,
+  //                       roomList[j].id,
+  //                     ]
+  //                   );
+  
+  //                   await transactionalEntityManager.query(
+  //                     `
+  //                                     INSERT INTO appointments
+  //                                     (providerID, medicalCenterID, providerShiftID, apointmentDate, roomID,requestID)
+  //                                     VALUES
+  //                                     (?,?,?,?,?,?);
+  //                                     `,
+  //                     [
+  //                       req.user.id,
+  //                       providerInfo.associatedMedicalID,
+  //                       info.shiftID,
+  //                       currentDate,
+  //                       roomList[j].id,
+  //                       availbilityInfo.requestID,
+  //                     ]
+  //                   );
+  //                   j = roomList.length;
+  //                 }
+  //               }
+  //               else{
+  //                 overlappingEntries[
+  //                   currentDate
+  //                 ] = `Blocked on ${currentDate} for room ${roomList[j].id}`;
+  //               }
+                
+  //             }
+  //           }
+  //         }
+  //       }
+  //       overlappingEntries = Object.fromEntries(
+  //         Object.entries(overlappingEntries).filter(([key, value]) => value !== null)
+  //       );
+  //       return {
+  //         data: overlappingEntries,
+  //         message: "All entries have been added except overlapping ones.",
+  //       };
+  //     }
+  //   );
+  //   return result;
+  // }
+async addAvailability(availbilityInfo: addAvailabilityDTO, req) {
+  let logAdded: boolean = false;
+  let result = await getManager().transaction(
+    async (transactionalEntityManager) => {
+      let overlappingEntries = {};
+      let requestInfo = await transactionalEntityManager.query(
+        "select * from requests where id=?",
+        [availbilityInfo.requestID]
+      );
+
+      let providerShiftsInfo = await transactionalEntityManager.query(
+        "select * from `provider-availability` where providerID=?",
+        [req.user.id]
+      );
+
+      let providerInfo = await transactionalEntityManager.query(
+        "select * from users where id=?",
+        [req.user.id]
+      );
+
+      let roomList = await transactionalEntityManager.query(
+        "select * from `medical-center-rooms` mcr where mcr.medicalCenterID = ? AND mcr.roomTypeID=?",
+        [
+          providerInfo[0].associatedMedicalID,
+          providerInfo[0].specializationID,
+        ]
+      );
+
+      let extraHolidays = await transactionalEntityManager.query(
+        "SELECT holidayDate FROM requestholidays where requestID=?",
+        [availbilityInfo.requestID]
+      );
+
+      if (availbilityInfo.availability && availbilityInfo.availability.length) {
+        for (let i = 0; i < availbilityInfo.availability.length; i++) {
+          let info = availbilityInfo.availability[i];
+          let startDate = info.startDate; 
+          let endDate = info.endDate;
+          let holidays = extraHolidays.map((x) => moment(x.holidayDate).format('YYYY-MM-DD'));
+          let days: string[] = this.getWeekdaysBetween(
+            startDate, 
+            endDate,
+            requestInfo[0].weekendsOff,
+            holidays 
+          );
+
+          if (days && days.length) {
+            for (let j = 0; j < days.length; j++) {
+              let currentDate = days[j];
+              if (roomList && roomList.length) {
+                for (let k = 0; k < roomList.length; k++) {
+                  // Directly insert availability without checking for overlaps
+                  await transactionalEntityManager.query(
+                    `
+                      INSERT INTO appointments
+                      (providerID, medicalCenterID, providerShiftID, apointmentDate, roomID, requestID)
+                      VALUES(?,?,?,?,?,?);
+                    `,
                     [
-                      providerInfo.associatedMedicalID,
-                      currentDate,
-                      providerInfo.specializationID,
-                      roomList[j].id,
                       req.user.id,
+                      providerInfo[0].associatedMedicalID,
+                      info.shiftID,
+                      currentDate,
+                      roomList[k].id,
+                      availbilityInfo.requestID,
                     ]
                   );
-                  shiftsOnThatDay = shiftsOnThatDay[0];
-                  if (this.isOverlapping(shiftStart, shiftEnd, shiftsOnThatDay)) {
-                    overlappingEntries[
-                      currentDate
-                    ] = `overlapping on ${currentDate} for room ${roomList[j].id}`;
-                  } else {
-                    overlappingEntries[currentDate] = null;
+                  
+                  // Log activity once
+                  if (!logAdded) {
                     await transactionalEntityManager.query(
-                      `
-                                      DELETE FROM appointments a WHERE a.providerID=? AND a.medicalCenterID=? AND  a.apointmentDate=? AND a.roomID=?;
-                                      `,
+                      `INSERT INTO activityLogs(name, activity, userID, requestID, causerID) 
+                      VALUES(?,?,?,?,?)`,
                       [
+                        'Added Availability',
+                        `${req.user.name} have added their availability against request.`,
                         req.user.id,
-                        providerInfo.associatedMedicalID,
-                        currentDate,
-                        roomList[j].id,
-                      ]
-                    );
-  
-                    await transactionalEntityManager.query(
-                      `
-                                      INSERT INTO appointments
-                                      (providerID, medicalCenterID, providerShiftID, apointmentDate, roomID,requestID)
-                                      VALUES
-                                      (?,?,?,?,?,?);
-                                      `,
-                      [
-                        req.user.id,
-                        providerInfo.associatedMedicalID,
-                        info.shiftID,
-                        currentDate,
-                        roomList[j].id,
                         availbilityInfo.requestID,
+                        req.user.id,
                       ]
                     );
-                    j = roomList.length;
+                    logAdded = true;
                   }
+                  k = roomList.length; // Move to next day after successful insert
                 }
-                else{
-                  overlappingEntries[
-                    currentDate
-                  ] = `Blocked on ${currentDate} for room ${roomList[j].id}`;
-                }
-                
               }
             }
           }
         }
-        overlappingEntries = Object.fromEntries(
-          Object.entries(overlappingEntries).filter(([key, value]) => value !== null)
-        );
-        return {
-          data: overlappingEntries,
-          message: "All entries have been added except overlapping ones.",
-        };
       }
-    );
-    return result;
-  }
+
+      if (
+        availbilityInfo.customAvailability &&
+        availbilityInfo.customAvailability.length
+      ) {
+        for (let i = 0; i < availbilityInfo.customAvailability.length; i++) {
+          let info = availbilityInfo.customAvailability[i];
+          let currentDate = info.date;
+
+          if (roomList && roomList.length) {
+            for (let j = 0; j < roomList.length; j++) {
+              // Directly insert custom availability without checking for overlaps
+              await transactionalEntityManager.query(
+                `
+                  DELETE FROM appointments 
+                  WHERE providerID=? AND medicalCenterID=? AND apointmentDate=? AND roomID=?;
+                `,
+                [
+                  req.user.id,
+                  providerInfo[0].associatedMedicalID,
+                  currentDate,
+                  roomList[j].id,
+                ]
+              );
+
+              await transactionalEntityManager.query(
+                `
+                  INSERT INTO appointments
+                  (providerID, medicalCenterID, providerShiftID, apointmentDate, roomID, requestID)
+                  VALUES(?,?,?,?,?,?);
+                `,
+                [
+                  req.user.id,
+                  providerInfo[0].associatedMedicalID,
+                  info.shiftID,
+                  currentDate,
+                  roomList[j].id,
+                  availbilityInfo.requestID,
+                ]
+              );
+              j = roomList.length; // Move to next day after successful insert
+            }
+          }
+        }
+      }
+
+      return {
+        data: {},
+        message: "All entries have been added successfully.",
+      };
+    }
+  );
+  return result;
+}
 
   async updateAvailability(
     availabilityInfo: updateAvailbilityDTO,
@@ -397,9 +542,9 @@ export class RequestsService {
             if (info.isDeleted) {
               await transactionalEntityManager.query(
                 `
-                            DELETE FROM appointments where id=?
+                            DELETE FROM appointments where apointmentDate=?
                             `,
-                [info.id]
+                [info.date]
               );
               if(!logAdded){
                 await transactionalEntityManager.query(
@@ -574,6 +719,8 @@ export class RequestsService {
       true
     );
   }
+
+
 
   async getRequestOfProvider(providerID,req){
     return await this._db.select(

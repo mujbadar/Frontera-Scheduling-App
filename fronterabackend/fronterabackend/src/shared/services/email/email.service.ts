@@ -30,7 +30,7 @@ export class EmailService {
 
     public async sendPassword(data:signUpEmail) {
         const email = new EmailConfiguration();
-        email.dynamic_template_data = {password: data.password}
+        email.dynamic_template_data = {password: data.password, name: data.recieverName}
         email.subject = "Thank you for signing up!"; 
         email.templateId = EMAIL_TEMPLATEIDS.SIGNUP_PASSWORD;
         email.to=data.recieverEmail;
@@ -40,7 +40,7 @@ export class EmailService {
 
     public async sendUpdateScheduleEmail(data:updateAvailbilityEmail) {
         const email = new EmailConfiguration();
-        email.dynamic_template_data = {deadline: data.deadline, login_url: data.login_url}
+        email.dynamic_template_data = {deadline: data.deadline, login_url: data.login_url, name: data.providerName}
         email.templateId = EMAIL_TEMPLATEIDS.UPDATE_AVAILBILITY;
         email.to=data.recieverEmail;
         return await this.sendEmail(email);

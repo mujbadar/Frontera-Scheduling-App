@@ -53,7 +53,7 @@ function DateDetails() {
   }
 
   return (
-    <section className="w-full lg:w-[90%] my-4 mx-auto">
+    <section className="mx-auto flex flex-col items-center flex flex-col w-[96%] mx-auto h-full">
       <div className="w-full flex items-center justify-between">
         <BackButton to="/" title="Back to Home" />
         <div className="flex gap-2 items-center">

@@ -28,7 +28,7 @@ export default function ProviderDetails() {
   });
 
   return (
-    <section className="w-full">
+    <section className="flex flex-col w-[96%] mx-auto h-full">
       <div className="mb-4 mt-2 flex justify-between items-center w-full">
         <BackButton
           to={`/providers/provider/${searchParams.get("providerID")}`}
@@ -64,7 +64,8 @@ export default function ProviderDetails() {
           No details found
         </p>
       ) : (
-        <Table>
+        <div>
+ <Table className=" md:hidden w-full">
           <TableHeader>
             <TableRow className="hover:bg-hms-blue-dark bg-hms-blue-dark text-white">
               <TableCell>S No.</TableCell>
@@ -111,6 +112,35 @@ export default function ProviderDetails() {
               : null}
           </TableBody>
         </Table>
+        <div className="hidden md:block">
+            {isFetched
+              ? data?.data.data.map(
+                  (
+                    pd: {
+                      id: number;
+                      date: string;
+                      shiftType: string;
+                      roomName: string;
+                      shiftFrom: string;
+                      shiftTo: string;
+                      medicalCenterName: string;
+                    },
+                    index: number
+                  ) => (
+                    <div key={pd.id} className="mb-4 p-4 border rounded-lg shadow-md">
+                      <h3 className="text-lg font-bold border-b transition-colors rounded-md p-2 data-[state=selected]:bg-muted hover:bg-hms-blue-dark bg-hms-blue-dark text-white text-center" >Shift {index + 1}</h3>
+                      <p><strong>Date:</strong> {pd.date}</p>
+                      <p><strong>Medical Center:</strong> {pd.medicalCenterName}</p>
+                      <p><strong>Room Name:</strong> {pd.roomName}</p>
+                      <p><strong>Shift Timmings:</strong> {pd.shiftFrom} To {pd.shiftTo}</p>
+                      <p><strong>Shift Type:</strong> {pd.shiftType}</p>
+                    </div>
+                  )
+                )
+              : null}
+          </div>
+        </div>
+       
       )}
     </section>
   );

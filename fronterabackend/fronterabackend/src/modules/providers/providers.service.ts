@@ -60,13 +60,13 @@ export class ProvidersService {
                   ]
                 );
               }
-              // if (providerInfo.email) {
-              //   let data: signUpEmail = new signUpEmail();
-              //   data.recieverEmail = providerInfo.email;
-              //   data.recieverName = providerInfo.name;
-              //   data.password = password;
-              //   await this.emailService.sendPassword(data);
-              // }
+              if (providerInfo.email) {
+                let data: signUpEmail = new signUpEmail();
+                data.recieverEmail = providerInfo.email;
+                data.recieverName = providerInfo.name;
+                data.password = password;
+                await this.emailService.sendPassword(data);
+              }
               return { message: "Successfully added provider." };
             }
           }
@@ -315,6 +315,13 @@ export class ProvidersService {
             }
           }
         });
+        if (providerInfo["Email"]) {
+          let data: signUpEmail = new signUpEmail();
+          data.recieverEmail = providerInfo["Email"];
+          data.recieverName = providerInfo["Provider Name"];
+          data.password = password;
+          await this.emailService.sendPassword(data);
+        }
       }
       return { message: `${count} Providers have been added successfully!` };
     } else {

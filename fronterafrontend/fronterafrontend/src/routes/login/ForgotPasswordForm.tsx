@@ -19,12 +19,22 @@ function ForgotPasswordForm() {
     mutationFn: async () =>
       await httpAuth.post(`auth/generatePasswordLink/${email}`),
     onSuccess(data) {
-      if (data?.data.success) {
+      if (data?.data?.data?.data?.exception) {
         reset();
         toast({
           description: (
             <Message
-              message="Reset link has been sent to your email"
+              message="An account with that email was not found in our system. Please contact us for support."
+              type="error"
+            />
+          ),
+        });
+      } else  if (data?.data?.data?.data?.data) {
+        reset();
+        toast({
+          description: (
+            <Message
+              message="Please check your email inbox for a link to reset your password."
               type="success"
             />
           ),

@@ -33,7 +33,7 @@ export default function UpdateScheduleAdmin() {
   }, [selectedProvider]);
 
   return (
-    <section className="w-full py-4">
+    <section className=" py-4  flex flex-col  flex flex-col w-[90%] mx-auto h-full">
       <h2 className="text-2xl font-bold text-hms-blue-dark">Update Schedule</h2>
       <div className="w-full flex flex-col gap-2 py-4">
         <div className="flex flex-col gap-2">

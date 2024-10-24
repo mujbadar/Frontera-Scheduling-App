@@ -30,7 +30,7 @@ function UpdateRequest({}: Props) {
     });
 
   return (
-    <div className="w-full">
+    <div className="py-4  flex flex-col  flex flex-col w-[90%] mx-auto h-full">
       <h2 className="text-2xl text-hms-blue-dark font-semibold my-2">
         Update Provider's Availability
       </h2>

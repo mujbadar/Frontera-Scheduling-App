@@ -6,9 +6,11 @@ import { TRegion } from "types";
 import Loading from "../../../components/loading";
 import dayjs from "dayjs";
 import httpCommon from "../../helper/httpCommon";
+import { useState } from "react";
 
 function MedicalCenters() {
   const [_, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     data: regions_data,
@@ -46,6 +48,13 @@ function MedicalCenters() {
           Medical Centers
         </h1>
         <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Search by Center Name"
+            className="border px-4 py-2 rounded-lg"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <div className="flex gap-2 items-center">
             {fetching_regions ? (
               <Loading />
@@ -66,7 +75,7 @@ function MedicalCenters() {
           </Link>
         </div>
       </div>
-      <CentersTable />
+      <CentersTable searchTerm={searchTerm} />
     </>
   );
 }

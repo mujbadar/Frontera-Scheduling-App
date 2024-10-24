@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import Dropdown from "./../../../components/dropdown";
 import ProvidersTable from "@/routes/providers/ProvidersTable.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +10,7 @@ import httpCommon from "../../helper/httpCommon";
 
 function Providers() {
   const [_, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(""); // Track the search query
 
   const {
     data: regions_data,
@@ -39,6 +41,11 @@ function Providers() {
     setSearchParams(`region=${regionID}`);
   };
 
+  // Filter function to search by provider name
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <section className={"w-full"}>
       <div className="w-full flex my-4 justify-between">
@@ -46,6 +53,13 @@ function Providers() {
           Providers
         </h1>
         <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearch}
+            placeholder="Search provider"
+            className="border border-hms-green-light py-2 px-4 rounded-lg"
+          />
           <div className="flex gap-2 items-center">
             {fetching_regions ? (
               <Loading />
@@ -57,7 +71,7 @@ function Providers() {
                 triggerCustomStyles="bg-hms-green-bright border border-hms-green-light py-2 px-4 gap-4 rounded-lg hover:bg-hms-green-dark hover:text-white font-semibold text-hms-green-dark text-green-light"
               />
             )}
-          </div>{" "}
+          </div>
           <Link
             className="px-4 py-2 rounded-lg bg-hms-green-dark text-white"
             to={"/providers/add-provider"}
@@ -66,7 +80,7 @@ function Providers() {
           </Link>
         </div>
       </div>
-      <ProvidersTable />
+      <ProvidersTable searchQuery={searchQuery} />
     </section>
   );
 }

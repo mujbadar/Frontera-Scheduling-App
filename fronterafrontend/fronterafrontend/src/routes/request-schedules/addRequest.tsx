@@ -285,7 +285,7 @@ export default function AddRequest() {
         </div>
         {startDate.length > 0 && endDate.length > 0  ? (
          <Label className={"w-full flex flex-col items-start gap-2"}>
-         <span className={"text-lg"}>Pick Holidays</span>
+         <span className={"text-lg"}>Pick Time off</span>
          <HolidaysPickerDropdown
            triggerTitle={"Pick holidays"}
            holidays={holidays}
@@ -322,7 +322,7 @@ export default function AddRequest() {
             }}
           />
 
-          <span className={"text-lg"}>Each weekend (As Holiday)</span>
+          <span className={"text-lg"}>Each weekend (Time off)</span>
         </Label>
         <Label className={"w-full flex flex-col items-start gap-2"}>
           <span className={"text-lg"}>Deadline</span>

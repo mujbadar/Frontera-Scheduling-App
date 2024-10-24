@@ -5,12 +5,23 @@
     background-color: rgb(17 28 54 / 1) !important;
 }
 .navbar-box{
-    margin: 15px 0 15px 0 !important;
-    padding: 0.5rem !important;
-    background-color: rgb(17 28 54 / 1) !important;
-    color: white !important;
-    border-radius: 0.5rem !important;
+    background-color: white!important;
+    color: #111c36  !important;
+    /* border-radius: 0.5rem !important; */
     align-items: center !important;
+    box-shadow: 0 5px 15px 0 rgba(0,0,0,.2);
+    --bs-navbar-padding-y: 0 !important;
+    height: 65px;
+    margin-bottom: 20px;
+
+    /* border-bottom: 5px solid rgb(17 28 54 / 1) !important; */
+    /* border-radius: 0px !important; */
+}
+.navbar-cont{
+  background: rgb(49 158 79 / 1) !important;
+  width: 50px;
+  height: 65px;
+  display: block;
 }
 a{
     text-decoration: none !important;
@@ -21,6 +32,11 @@ a{
     align-items: center; /* Ensures items are centered vertically */
     height: 100%; /* Use 100% height relative to the parent */
     justify-content: center;
+  border-radius: 0.5rem !important;
+
+    a{
+      color:  black !important;
+    }
 }
 
 .nav-item button {
@@ -51,17 +67,23 @@ a{
 .navbar-nav{
     margin-right: 10px !important;
     a{
-        color: white !important;
+        color: black !important;
     }
 }
- 
+
 a{
     color: black !important;
 }
  
 .active{
-    background-color: rgb(49 158 79 / 1) !important;
+  border-bottom: 2px solid  rgb(49 158 79 / 1) !important;
+  border-radius: 0px !important;
+    /* background-color: rgb(49 158 79 / 1) !important; */
+    /* .nav-link{
+      color: white !important;
+     } */
 }
+
 .d-right{
     position: absolute;
     right: 15px;
@@ -70,10 +92,47 @@ a{
 .navbar-collapse {
     display: none;
   }
+ 
+  
+  .header-dropdown {
+    transition: background-color 0.2s ease, color 0.2s ease; /* Smooth transition */
+  }
+
+  
   
   /* Show the menu when toggled */
   .navbar-collapse.show {
     display: block;
+    overflow: visible !important
+  
+
+   
+  }
+  .show.mobile-view{
+    z-index: 999 !important;
+      margin-top: -26px; 
+    background: white;
+    /* padding-bottom: 20px; */
+     box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .2) !important;
+    .active{
+      border-bottom: 0px !important;
+    }
+    .auth-btn{
+      margin-top: 10px;
+    }
+    .auth-btn:hover{
+      background: none !important;
+      color: #6c757d !important;
+    }
+     
+    .nav-item:hover{
+      border-bottom: 0px !important;
+      background-color: rgb(49 158 79 / 1);
+      color: white !important;
+      a{
+        color: white !important;
+      }
+    }
   }
   
   /* Optionally, add styles for animation */
@@ -91,12 +150,20 @@ a{
     background-color: white !important;
   }
   .nav-item:hover {
-    background-color: rgb(49 158 79 / 1) !important;
+    /* background-color: rgb(49 158 79 / 1) !important;
+    color: white !important; */
+    border-bottom: 2px solid  rgb(49 158 79 / 1) !important;
+    border-radius: 0px !important;
     
 }
   @media only screen and (max-width: 768px) {
     .navbar-nav{
         text-align: center !important;
+        background-color: white !important;
+        box-shadow: 0 5px 15px 0 rgba(0, 0, 0, .2) !important;
+        padding: 20px 20px 20px 0px !important;
+        margin: 0px !important;
+        z-index: 10000;
     }
     .text-primary{
         background-color: white !important;
@@ -107,9 +174,16 @@ a{
     .nav-item{
         text-align: center !important;
         display: ruby !important;
+  border-radius: 0.5rem !important;
+
         button{
             margin-top: 15px !important;
         }
+    }
+    .nav-item:hover{
+      background: rgb(49 158 79 / 1);
+      border: none !important;
+      color: white !important;
     }
     .active{
         background-color: rgb(49 158 79 / 1) !important;
@@ -121,12 +195,85 @@ a{
     .auth-btn:hover{
         background: none!important;
     }
+    .notificatio-icon{
+      margin-top: 10px !important;
+    }
     
   }
-
+  .user:hover{
+    background: none!important;
+    border: none !important;
+}
   .notification{
     padding-top: 10px;
   }
   .notification:hover{
     background-color: transparent !important;
   }
+
+  .calendar-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .calendar-dot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  .modal-btn{
+  }
+  .rs-modal-wrapper{
+    display: flex;
+    align-items: center;
+  }
+  .rs-calendar-panel:not(.rs-calendar-compact) .rs-calendar-table-row:not(.rs-calendar-table-header-row) .rs-calendar-table-cell-content{
+    z-index: 0 !important;
+  }
+  .rs-modal-footer{
+    .modal-btn{
+        background-color: rgb(49 158 79 / 1) !important;
+        a{
+            color: white !important;
+
+        }
+
+    }
+  }
+  .circle{
+    background-color: rgb(49 158 79 / 1);
+    width: 30px;
+    height: 30px;
+    border-radius: 50px;
+    color: white;
+    text-align: center;
+    align-items: center;
+    display: grid;
+    font-size: 12px;
+  }
+
+  .seperator{
+    border-left:1px solid rgb(223 225 224);
+    border-radius: 0px !important;
+    span{
+      visibility: hidden;
+      padding-right: 0px !important;
+      padding-left: 0px !important;
+    }
+  }
+
+/*  
+  @media (max-width: 768px) {
+    section {
+      z-index: -1 !important;
+    }
+  } */
+   
+  nav {
+    z-index: 1; /* Make sure this is lower than the dropdown */
+  }
+  

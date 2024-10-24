@@ -136,7 +136,7 @@ export default function UpdateSchedule() {
                   <div className={"w-full flex flex-col gap-2"}>
                     <p>{data?.data.data.message}</p>
                     {Object.keys(data?.data.data.data).length > 0 ? (
-                      <p className={"text-red-600 text-lg font-semibold"}>
+                      <p className={"text-red-600 text-lg font-semibold mb-0"}>
                         Conflicting schedules found for{" "}
                         {Object.keys(data?.data.data.data)[0]} and{" "}
                         {Object.keys(data?.data.data.data).length - 1} more
@@ -169,7 +169,7 @@ export default function UpdateSchedule() {
       <Loading message="Fetching request information" />
     </div>
   ) : (
-    <section className="w-full h-screen">
+    <section className="mx-auto flex flex-col items-center flex flex-col w-[96%] mx-auto h-full">
       <div className="w-full flex justify-between items-center">
         <h1 className="my-4 min-w-max text-3xl text-hms-green-dark font-bold">
           Update Your Availability 

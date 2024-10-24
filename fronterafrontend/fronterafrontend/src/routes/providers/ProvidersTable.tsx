@@ -18,7 +18,11 @@ import httpCommon from "../../helper/httpCommon.ts";
 import { useToast } from "../../../components/ui/use-toast.ts";
 import Message from "../../../components/toasts.tsx";
 
-export default function ProvidersTable() {
+interface ProvidersTableProps {
+  searchQuery: string; // Add prop type for search query
+}
+
+export default function ProvidersTable({ searchQuery }: ProvidersTableProps) {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const {
@@ -45,7 +49,7 @@ export default function ProvidersTable() {
     },
   });
 
-  let providers;
+  let providers:any = [];
 
   if (status === "success") {
     providers = [].concat(...data.pages.map((page) => page.data.data.listing));
@@ -72,7 +76,7 @@ export default function ProvidersTable() {
     refetch();
   }, [searchParams.get("region"), refetch]);
 
-  // delete provider logic
+  // Delete provider logic
   const {
     status: delete_provider_status,
     mutate: delete_provider,
@@ -93,6 +97,11 @@ export default function ProvidersTable() {
       }
     },
   });
+
+  // Filter providers based on search query
+  const filteredProviders = providers?.filter((provider: { name: string; }) =>
+    provider.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Table className={"relative w-full border-collapse rounded-lg"}>
@@ -126,8 +135,8 @@ export default function ProvidersTable() {
           "block overflow-y-auto max-h-[calc(100vh_-_200px)] scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar scrollbar-thumb-hms-green-dark scrollbar-track-hms-green-light"
         }
       >
-        {providers && providers.length>0 ? (
-          providers.map((provider: any, index: number) => {
+        {filteredProviders && filteredProviders.length > 0 ? (
+          filteredProviders.map((provider: any, index: number) => {
             return (
               <TableRow
                 className={"text-gray-800 border-none table w-full table-fixed"}

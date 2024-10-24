@@ -13,6 +13,8 @@ export default function Root() {
   const [user, _setUser, logout] = useAuth();
   const isAdmin = user?.role === "ADMIN";
   const [isNavbarCollapsed, setIsNavbarCollapsed] = useState(true);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false); // State for dropdown visibility
+
 
   const toggleNavbar = () => {
     setIsNavbarCollapsed(!isNavbarCollapsed);
@@ -22,9 +24,23 @@ export default function Root() {
     setIsNavbarCollapsed(true);
   };
 
+  const toggleDropdown = () => {
+    setIsDropdownVisible(!isDropdownVisible); // Toggle dropdown visibility
+  };
+
+// Function to get initials from user name
+const getInitials = (name: any) => {
+  if (!name) return '';
+  const nameParts = name.split(' ');
+  const initials = nameParts.map((part: any[]) => part[0]).join('');
+  return initials.toUpperCase();
+};
+
   return (
-    <main className="flex flex-col max-w-[1400px] w-[98%] mx-auto h-full">
-      <nav className="navbar navbar-expand-lg navbar-box w-full mx-auto rounded-lg my-2 flex gap-4 bg-hms-blue-dark items-center px-4 py-2 text-white justify-center h-15" >
+    <main className="flex flex-col w-[100%] mx-auto h-full">
+      <nav className="navbar navbar-expand-lg navbar-box w-full  flex gap-4 bg-hms-blue-dark items-center text-white justify-center h-15" style={{ overflow: 'visible' }}>
+      <a className="block sm:hidden navbar-cont h-15" href="#">
+        </a>
         <a className="navbar-brand" href="#">
           <img src={logo} alt="Logo" className="d-inline-block align-top" style={{ height: "40px" }} /> {/* Adjust height as needed */}
         </a>
@@ -42,11 +58,7 @@ export default function Root() {
         {/* Menu visible on larger screens */}
         <div className="navbar-collapse d-right d-none d-lg-block show" id="navbarSupportedContent">
           <ul className="navbar-nav ml-auto">
-            <li className="nav-item user">
-              <span className="nav-link username rounded-sm">
-                {user?.name}
-              </span>
-            </li>
+            
             <li className={`nav-item ${location === "" ? "active" : ""}`}>
               <Link className="nav-link" to="/" onClick={handleMenuItemClick}>
                 Home
@@ -81,7 +93,7 @@ export default function Root() {
                 <UpdateScheduleLink location={location}  />
               </li>
             )}
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <Button
                 onClick={() => {
                   if (logout) logout();
@@ -90,9 +102,45 @@ export default function Root() {
               >
                 Logout
               </Button>
+            </li> */}
+            <li className="nav-item seperator">
+            <span className="nav-link username rounded-sm">
+                 s
+              </span>
+            </li>
+            <li className="nav-item user cursor-pointer relative" onClick={toggleDropdown} style={{ position: 'relative' }}>
+              <div className="circle">
+              <span>{getInitials(user?.name)}</span>              </div>
+              <span className="nav-link username rounded-sm">
+                {user?.name}
+              </span>
+             {/* Dropdown Menu */}
+             {isDropdownVisible && (
+              <div 
+  className="absolute mt-2 w-48 bg-white rounded-lg shadow-lg py-2 text-left header-dropdown"
+  style={{ 
+    top: '100%', 
+    right: '0', 
+    zIndex: 9999, 
+    position: 'absolute',
+  }}
+>
+
+             
+                  <button
+                    onClick={() => {
+                      if (logout) logout();
+                    }}
+                    className="dropdown-btn  block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200"
+                    >
+                    Logout
+                  </button>
+                </div>
+              )}
+
             </li>
             {isAdmin && (
-              <li className="nav-item notification">
+              <li className="nav-item notification ">
                 <Notifications />
               </li>
             )}
@@ -100,7 +148,7 @@ export default function Root() {
         </div>
 
         {/* Menu visible on smaller screens */}
-        <div className={`navbar-collapse ${!isNavbarCollapsed ? 'show' : ''} d-lg-none`} id="navbarSupportedContent">
+        <div className={`navbar-collapse ${!isNavbarCollapsed ? 'show' : ''} d-lg-none mobile-view` } id="navbarSupportedContent">
           <ul className="navbar-nav ml-auto">
             <li className="nav-item user">
               <span className="nav-link text-primary">
@@ -152,7 +200,7 @@ export default function Root() {
               </Button>
             </li>
             {isAdmin && (
-              <li className="nav-item">
+              <li className="nav-item notificatio-icon">
                 <Notifications />
               </li>
             )}

@@ -26,7 +26,8 @@ export default function UpdatePopup({
   availabilities: any[] | undefined;
   id: number;
 }) {
-  const [isOpen, setIsOpen] = useState<boolean | undefined>();
+const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const [currentShift, setCurrentShift] = useState<number | null>(null);
 
   const shiftsArray = Array.isArray(shifts) ? shifts : [shifts];

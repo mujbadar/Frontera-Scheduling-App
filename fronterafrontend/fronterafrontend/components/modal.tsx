@@ -17,7 +17,7 @@ type Props = {
   children: React.ReactNode;
   onlyIcon?: React.ReactNode;
   customClose?: boolean | undefined;
-  customOpen?: React.Dispatch<SetStateAction<boolean | undefined>>;
+  customOpen?: React.Dispatch<SetStateAction<any | undefined>>;
 };
 
 export default function Modal({

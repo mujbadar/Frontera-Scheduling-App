@@ -79,7 +79,7 @@ export class AuthService {
             let data: passwordResetLink = new passwordResetLink();
             data.recieverEmail = userEmail;
             data.resetUrl = resetUrl;
-            data.recieverName = userUpdated.legalName;
+            data.recieverName = userUpdated.name;
 
             await this.db.insertUpdatDelete("update users set passwordResetToken=? where email=?", [resetUrl, data.recieverEmail]);
             emailResult = await this.emailService.generatePasswordLink(data);

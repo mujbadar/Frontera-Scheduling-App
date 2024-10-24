@@ -5,7 +5,7 @@ export default function Message({
   message,
   type,
 }: {
-  message: string|React.ReactNode;
+  message: string | React.ReactNode;
   type: "success" | "error";
 }) {
   const icons = {
@@ -14,9 +14,14 @@ export default function Message({
     ),
     error: <RiErrorWarningFill className="text-red-700 text-2xl" />,
   };
+
   return (
-    <p className="w-full gap-2 p-2 items-center flex">
-      {icons[type]} <p className="text-lg">{message}</p>
-    </p>
+    <div
+      className="fixed top-5 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-white p-4 rounded-md shadow-lg"
+      style={{ zIndex: 9999 }}
+    >
+      {icons[type]}
+      <p className="text-lg mb-0">{message}</p>
+    </div>
   );
 }

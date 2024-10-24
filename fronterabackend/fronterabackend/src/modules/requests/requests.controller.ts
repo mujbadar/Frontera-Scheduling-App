@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AuthGuardJWT } from 'src/guards/auth.guard';
 import { AuthUserInterceptorService } from 'src/interceptors/auth-user-interceptor/auth-user-interceptor.service';
@@ -39,8 +39,21 @@ export class RequestsController {
     }
 
 
-    @Post("availability/add")
+    // @Post("availability/add")
+    // async addAvailability(@Body() availabilityInfo:addAvailabilityDTO,@Req() request: Request ){
+    //     return this._reqSrv.addAvailability(availabilityInfo,request)
+    // }
+     @Post("availability/add")
     async addAvailability(@Body() availabilityInfo:addAvailabilityDTO,@Req() request: Request ){
+        return {
+             
+                "data": {},
+                "message": "All entries have been added except overlapping ones."
+            
+        }
+    }
+    @Post("availability/confirmAdd")
+    async addConfirmAvailability(@Body() availabilityInfo:addAvailabilityDTO,@Req() request: Request ){
         return this._reqSrv.addAvailability(availabilityInfo,request)
     }
 
@@ -62,6 +75,17 @@ export class RequestsController {
         @Req() request: Request ){
         return this._reqSrv.getProviderRequestDetails(requestID,request)
     }
+//     @Get("fetch-request-details/:requestID/")
+// @ApiParam({ name: "requestID", required: true })
+// async getProviderRequestDetails(
+//     @Param("requestID") requestID: number,
+//     @Query("startDate") startDate: string, // Expect start date as query parameter
+//     @Query("endDate") endDate: string,     // Expect end date as query parameter
+//     @Req() request: Request 
+// ) {
+//     return this._reqSrv.getProviderRequestDetails(requestID, request, startDate, endDate);
+// }
+
 
     @Get("providers")
     async getProvidersAgainstRequest(

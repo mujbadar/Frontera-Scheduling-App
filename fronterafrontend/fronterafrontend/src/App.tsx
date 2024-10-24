@@ -3,6 +3,8 @@ import { Calendar } from "rsuite";
 import dayjs from "dayjs";
 
 import "rsuite/Calendar/styles/index.css";
+import 'rsuite/Modal/styles/index.css';
+
 import { Link } from "react-router-dom";
 import { useAuth } from "./providers/authProvider";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +13,9 @@ import httpCommon from "./helper/httpCommon";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { getDayNamedDate } from "../lib/utils";
+import { Dot } from "lucide-react"; // Import the correct icon
+import { Modal, Button } from 'rsuite';
+
 
 function App() {
   const [user] = useAuth();
@@ -41,51 +46,99 @@ function App() {
   useEffect(() => {
     fetch_new_month();
   }, [currentMonth]);
-
+  const [showModal, setShowModal] = useState(false);
+  const [selectedShift, setSelectedShift] = useState<any>(null);
+  const handleDotClick = (cd: any) => {
+    setSelectedShift(cd); // Set the clicked shift details
+    setShowModal(true);   // Show the modal
+  };
   function renderCell(date: Date) {
     return isFetching ? (
       <Loading />
     ) : (
-      <ul>
+      <ul
+      className="calendar-cell"
+      onClick={() => {
+        const matchingData = calenderData.find(
+          (cd: any) =>
+            dayjs(cd.currentDate).format("YYYY-MM-DD") ===
+            dayjs(date).format("YYYY-MM-DD")
+        );
+        if (matchingData) {
+          handleDotClick(matchingData); // Open modal with matched data
+        }
+      }}
+    >
         {calenderData.map((cd: any) => {
           if (
             dayjs(cd.currentDate).format("YYYY-MM-DD") ===
             dayjs(date).format("YYYY-MM-DD")
           ) {
             return isAdmin ? (
-              <Link to={`date-details/${cd.currentDate}`} key={date.toString()}>
-                <div>
-                  {cd.centersCount} &nbsp;
-                  {cd.centersCount === "1" ? "Center" : "Centers"} <br />
-                  {cd.providerCount} &nbsp;
-                  {cd.providerCount === "1" ? "Provider" : "Providers"} <br />
-                  {cd.totalShiftOnCurrentDate} &nbsp;
-                  {cd.totalShiftCount === "1" ? "Shift" : "Shifts"} <br />
+              <div key={date.toString()} 
+                 onClick={() => {
+                    handleDotClick(cd);  // Open the modal when clicked
+                  }}>
+                {/* Wrap only the content that should trigger navigation in a Link */}
+                <Link to={`date-details/${cd.currentDate}`}>
+                  <div>
+                    {cd.centersCount} &nbsp;
+                    {cd.centersCount === "1" ? "Center" : "Centers"} <br />
+                    {cd.providerCount} &nbsp;
+                    {cd.providerCount === "1" ? "Provider" : "Providers"} <br />
+                    {cd.totalShiftOnCurrentDate} &nbsp;
+                    {cd.totalShiftCount === "1" ? "Shift" : "Shifts"} <br />
+                  </div>
+                </Link>
+                
+                {/* Dot icon triggers modal, no navigation */}
+                <div 
+                className="w-6 h-6 text-hms-green-dark hover:text-hms-green-light cursor-pointer "
+             
+                >
+                  <Dot className="w-6 h-6 text-hms-green-dark hover:text-hms-green-light" />
                 </div>
-              </Link>
+              </div>
             ) : (
-              <Link
-                to={`provider-details?providerID=${user?.id}&date=${dayjs(
-                  date
-                ).format("YYYY-MM-DD")}`}
-              >
-                <p className="w-full font-semibold h-full flex flex-col items-center gap-2 bg-hms-green-bright text-hms-green-dark my-4 p-1 rounded-lg text-center">
-                  <span>
-                    {cd.totalShiftOnCurrentDate}
-                    &nbsp;
-                    {cd.totalShiftOnCurrentDate === "1" ? "shift" : "shifts"}
-                  </span>
-                </p>
-              </Link>
+              <div key={date.toString()}
+              
+              onClick={() => {
+                handleDotClick(cd);  // Open the modal
+              }}>
+                {/* Navigation link for non-admin */}
+                {/* <Link
+                  to={`provider-details?providerID=${user?.id}&date=${dayjs(
+                    date
+                  ).format("YYYY-MM-DD")}`}
+                >
+                  <p className="w-full font-semibold h-full flex flex-col items-center gap-2 bg-hms-green-bright text-hms-green-dark my-4 p-1 rounded-lg text-center">
+                    <span>
+                      <Dot className="w-6 h-6 text-hms-green-dark hover:text-hms-green-light" />
+                    </span>
+                  </p>
+                </Link> */}
+  
+                {/* Separate Dot icon triggers modal */}
+                <div
+                  className="cursor-pointer"
+               
+                >
+                  <Dot className="w-6 h-6 text-hms-green-dark hover:text-hms-green-light" />
+                </div>
+              </div>
             );
           } else return null;
         })}
       </ul>
     );
   }
+  
+  
+  
+  
 
   return (
-    <section className="w-full">
+    <section className="flex flex-col w-[96%] mx-auto h-full">
       <div className="w-full flex justify-end items-center">
         {fetchingExportData ? (
           <Loading contained={true} />
@@ -128,6 +181,44 @@ function App() {
           }
           renderCell={renderCell}
         />
+        <Modal open={showModal} onClose={() => setShowModal(false)} size="xs" backdrop="static">
+  <Modal.Header>
+    <Modal.Title>Shift Details</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {selectedShift ? (
+      <div>
+        {/* Render shift details */}
+        {selectedShift.totalShiftOnCurrentDate ? (
+          <p>{selectedShift.totalShiftOnCurrentDate} &nbsp;
+            {selectedShift.totalShiftOnCurrentDate === "1" ? "shift" : "shifts"}</p>
+        ) : (
+          <p>No shift data available</p>
+        )}
+      </div>
+    ) : (
+      <p>No shift selected</p>
+    )}
+  </Modal.Body>
+  <Modal.Footer>
+    {selectedShift && (
+      <Button  className="modal-btn bg-hms-green-dark" >
+        <Link
+          to={`provider-details?providerID=${user?.id}&date=${dayjs(
+            selectedShift?.currentDate
+          ).format("YYYY-MM-DD")}`}
+        >
+          View Details
+        </Link>
+      </Button>
+    )}
+    <Button onClick={() => setShowModal(false)} appearance="subtle">
+      Close
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+
       </div>
     </section>
   );

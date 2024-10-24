@@ -18,7 +18,7 @@ export default function Notifications() {
       ) : isFetched && data?.data.data.length > 0 ? (
         <GoDotFill className="absolute text-sm text-red-700 -top-2 -right-2" />
       ) : null}
-      <FaRegBell className="text-xl text-white" />
+      <FaRegBell className="text-xl" />
     </Link>
   );
 }

@@ -32,4 +32,5 @@ export class updateAvailbilityEmail{
     deadline:string='';
     login_url:string='';
     recieverEmail: string='';
+    providerName: string='';
 }
