@@ -18,8 +18,8 @@ async function bootstrap() {
   );
   app.enableCors(
     {
-    origin: 'https://fronterascheduling.com', // Allow requests from your Angular frontend
-    //  origin: 'http://localhost:5173', // Allow requests from your Angular frontend
+    // origin: 'https://fronterascheduling.com', // Allow requests from your Angular frontend
+     origin: 'http://localhost:5173', // Allow requests from your Angular frontend
       // origin: 'http://13.60.222.155',
 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

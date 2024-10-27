@@ -12,9 +12,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": "https://api.fronterascheduling.com",
+      // "/api": "https://api.fronterascheduling.com",
       // "/api": "http://13.61.2.154:3000/",
-      // "/api": "http:/localhost:3000/",
+      "/api": "http:/localhost:3000/",
 
     },
   },
